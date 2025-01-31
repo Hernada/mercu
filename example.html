@@ -59,9 +59,7 @@
         header nav ul {
             list-style: none;
             display: flex;
-            gap: 10px; /* Adjust gap between the links */
-            padding: 0; /* Remove any default padding */
-            margin: 0; /* Remove any default margin */
+            gap: 20px;
         }
 
         header nav ul li a {
@@ -78,6 +76,21 @@
             background-color: #f47c7c;
         }
 
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .burger-menu div {
+            width: 25px;
+            height: 3px;
+            background-color: #ffffff;
+        }
+        
         /* Home Section */
         .hero {
         position: relative;
@@ -281,16 +294,27 @@
             }
 
             header nav ul {
+                display: none;
                 flex-direction: column;
                 gap: 10px;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                background-color: #333;
+                padding: 10px;
+                border-radius: 10px;
+            }
+
+            header nav ul.active {
+                display: flex;
+            }
+
+            .burger-menu {
+                display: flex;
             }
 
             .team-list {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            footer {
-                font-size: 0.8rem;
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -299,8 +323,13 @@
     <!-- Navigation Bar -->
     <header>
         <nav>
-            <img src="logg.png" alt="Mercusuar Basketball Club logo" style=" width: 5.5%;max-width: 120px;">
-            <ul>
+            <button class="burger-menu" id="burger-menu" aria-label="Toggle menu" aria-expanded="false">
+                <div></div>
+                <div></div>
+                <div></div>
+            </button>
+            <img src="logg.png" loading="lazy" alt="Mercusuar Basketball Club logo" style=" width: 5.5%;max-width: 120px;">
+            <ul id="menu-items">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About Us</a></li>
                 <li><a href="#teams">Our Teams</a></li>
@@ -393,17 +422,35 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            
-    const header = document.querySelector("header");
+            const burgerMenu = document.getElementById('burger-menu');
+            const menuItems = document.getElementById('menu-items');
+            const header = document.querySelector("header");
 
-    window.addEventListener("scroll", () => {
-        if (window.scrollY > 50) {  // Change 50px to whatever scroll position triggers the effect
-            header.classList.add("scrolled");
-        } else {
-            header.classList.remove("scrolled");
-        }
-    });
+            // Toggle menu
+            burgerMenu.addEventListener('click', () => {
+                const isExpanded = burgerMenu.getAttribute('aria-expanded') === 'true';
+                burgerMenu.setAttribute('aria-expanded', !isExpanded);
+                menuItems.classList.toggle('active');
+            });
 
+            // Smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Scroll event with debounce
+            window.addEventListener("scroll", () => {
+                if (window.scrollY > 50) {
+                    header.classList.add("scrolled");
+                } else {
+                    header.classList.remove("scrolled");
+                }
+            });
 
             // Event List
             const events = [
@@ -413,10 +460,9 @@
             ];
 
             const eventList = document.getElementById("event-list");
-
             events.forEach(event => {
                 const listItem = document.createElement("li");
-               listItem.classList.add("event-item");
+                listItem.classList.add("event-item");
                 listItem.innerHTML = `${event.name} <span>${event.date}</span>`;
                 eventList.appendChild(listItem);
             });
@@ -427,12 +473,10 @@
 
             contactForm.addEventListener("submit", (e) => {
                 e.preventDefault();
-
                 const name = document.getElementById("name").value;
                 const email = document.getElementById("email").value;
                 const message = document.getElementById("message").value;
 
-                // Simple validation
                 if (name && email && message) {
                     contactResponse.textContent = `Thank you for contacting us, ${name}! We will get back to you shortly.`;
                     contactForm.reset();
